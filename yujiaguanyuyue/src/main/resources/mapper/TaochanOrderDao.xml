@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.TaochanOrderDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.taochan_id as taochanId
+        ,a.yonghu_id as yonghuId
+        ,a.taochan_order_true_price as taochanOrderTruePrice
+        ,a.taochan_order_types as taochanOrderTypes
+        ,a.taochan_order_payment_types as taochanOrderPaymentTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.TaochanOrderView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,taochan.taochan_name as taochanName
+        ,taochan.taochan_photo as taochanPhoto
+        ,taochan.taochan_types as taochanTypes
+        ,taochan.taochan_new_money as taochanNewMoney
+        ,taochan.taochan_clicknum as taochanClicknum
+        ,taochan.shangxia_types as shangxiaTypes
+        ,taochan.taochan_delete as taochanDelete
+        ,taochan.taochan_content as taochanContent
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_email as yonghuEmail
+        ,yonghu.new_money as newMoney
+        ,yonghu.yonghu_delete as yonghuDelete
+
+        FROM taochan_order  a
+        left JOIN taochan taochan ON a.taochan_id = taochan.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.taochanId != null and params.taochanId != ''">
+                and (
+                    a.taochan_id = #{params.taochanId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.taochanOrderTruePriceStart != null ">
+                <![CDATA[  and a.taochan_order_true_price >= #{params.taochanOrderTruePriceStart}   ]]>
+            </if>
+            <if test="params.taochanOrderTruePriceEnd != null ">
+                <![CDATA[  and a.taochan_order_true_price <= #{params.taochanOrderTruePriceEnd}   ]]>
+            </if>
+            <if test="params.taochanOrderTypes != null and params.taochanOrderTypes != ''">
+                and a.taochan_order_types = #{params.taochanOrderTypes}
+            </if>
+            <if test="params.taochanOrderPaymentTypes != null and params.taochanOrderPaymentTypes != ''">
+                and a.taochan_order_payment_types = #{params.taochanOrderPaymentTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断套餐的id不为空 -->
+            <if test=" params.taochanIdNotNull != '' and params.taochanIdNotNull != null and params.taochanIdNotNull != 'null' ">
+                and a.taochan_id IS NOT NULL
+            </if>
+            <if test=" params.taochanName != '' and params.taochanName != null and params.taochanName != 'null' ">
+                and taochan.taochan_name like CONCAT('%',#{params.taochanName},'%')
+            </if>
+            <if test="params.taochanTypes != null  and params.taochanTypes != ''">
+                and taochan.taochan_types = #{params.taochanTypes}
+            </if>
+
+            <if test="params.taochanNewMoneyStart != null ">
+                <![CDATA[  and taochan.taochan_new_money >= #{params.taochanNewMoneyStart}   ]]>
+            </if>
+            <if test="params.taochanNewMoneyEnd != null ">
+                <![CDATA[  and taochan.taochan_new_money <= #{params.taochanNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.taochanClicknumStart != null  and params.taochanClicknumStart != '' ">
+                <![CDATA[  and taochan.taochan_clicknum >= #{params.taochanClicknumStart}   ]]>
+            </if>
+            <if test="params.taochanClicknumEnd != null  and params.taochanClicknumEnd != '' ">
+                <![CDATA[  and taochan.taochan_clicknum <= #{params.taochanClicknumEnd}   ]]>
+            </if>
+            <if test="params.taochanClicknum != null  and params.taochanClicknum != '' ">
+                and taochan.taochan_clicknum = #{params.taochanClicknum}
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and taochan.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.taochanDeleteStart != null  and params.taochanDeleteStart != '' ">
+                <![CDATA[  and taochan.taochan_delete >= #{params.taochanDeleteStart}   ]]>
+            </if>
+            <if test="params.taochanDeleteEnd != null  and params.taochanDeleteEnd != '' ">
+                <![CDATA[  and taochan.taochan_delete <= #{params.taochanDeleteEnd}   ]]>
+            </if>
+            <if test="params.taochanDelete != null  and params.taochanDelete != '' ">
+                and taochan.taochan_delete = #{params.taochanDelete}
+            </if>
+            <if test=" params.taochanContent != '' and params.taochanContent != null and params.taochanContent != 'null' ">
+                and taochan.taochan_content like CONCAT('%',#{params.taochanContent},'%')
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test="params.yonghuDeleteStart != null  and params.yonghuDeleteStart != '' ">
+                <![CDATA[  and yonghu.yonghu_delete >= #{params.yonghuDeleteStart}   ]]>
+            </if>
+            <if test="params.yonghuDeleteEnd != null  and params.yonghuDeleteEnd != '' ">
+                <![CDATA[  and yonghu.yonghu_delete <= #{params.yonghuDeleteEnd}   ]]>
+            </if>
+            <if test="params.yonghuDelete != null  and params.yonghuDelete != '' ">
+                and yonghu.yonghu_delete = #{params.yonghuDelete}
+            </if>
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>

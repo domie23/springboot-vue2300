@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.TaochanDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.taochan_name as taochanName
+        ,a.taochan_photo as taochanPhoto
+        ,a.taochan_types as taochanTypes
+        ,a.taochan_new_money as taochanNewMoney
+        ,a.taochan_clicknum as taochanClicknum
+        ,a.shangxia_types as shangxiaTypes
+        ,a.taochan_delete as taochanDelete
+        ,a.taochan_content as taochanContent
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.TaochanView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+
+        FROM taochan  a
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.taochanName != '' and params.taochanName != null and params.taochanName != 'null' ">
+                and a.taochan_name like CONCAT('%',#{params.taochanName},'%')
+            </if>
+            <if test="params.taochanTypes != null and params.taochanTypes != ''">
+                and a.taochan_types = #{params.taochanTypes}
+            </if>
+            <if test="params.taochanNewMoneyStart != null ">
+                <![CDATA[  and a.taochan_new_money >= #{params.taochanNewMoneyStart}   ]]>
+            </if>
+            <if test="params.taochanNewMoneyEnd != null ">
+                <![CDATA[  and a.taochan_new_money <= #{params.taochanNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.taochanClicknumStart != null and params.taochanClicknumStart != ''">
+                <![CDATA[  and a.taochan_clicknum >= #{params.taochanClicknumStart}   ]]>
+            </if>
+            <if test="params.taochanClicknumEnd != null and params.taochanClicknumEnd != ''">
+                <![CDATA[  and a.taochan_clicknum <= #{params.taochanClicknumEnd}   ]]>
+            </if>
+             <if test="params.taochanClicknum != null and params.taochanClicknum != ''">
+                and a.taochan_clicknum = #{params.taochanClicknum}
+             </if>
+            <if test="params.shangxiaTypes != null and params.shangxiaTypes != ''">
+                and a.shangxia_types = #{params.shangxiaTypes}
+            </if>
+            <if test="params.taochanDeleteStart != null and params.taochanDeleteStart != ''">
+                <![CDATA[  and a.taochan_delete >= #{params.taochanDeleteStart}   ]]>
+            </if>
+            <if test="params.taochanDeleteEnd != null and params.taochanDeleteEnd != ''">
+                <![CDATA[  and a.taochan_delete <= #{params.taochanDeleteEnd}   ]]>
+            </if>
+             <if test="params.taochanDelete != null and params.taochanDelete != ''">
+                and a.taochan_delete = #{params.taochanDelete}
+             </if>
+            <if test=" params.taochanContent != '' and params.taochanContent != null and params.taochanContent != 'null' ">
+                and a.taochan_content like CONCAT('%',#{params.taochanContent},'%')
+            </if>
+
+        </where>
+        order by a.${params.sort} ${params.order}
+    </select>
+
+</mapper>
